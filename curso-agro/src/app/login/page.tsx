@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
-  const router = useRouter(); // 🚀 Para redirecionamento
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,10 +25,10 @@ const Login = () => {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("user", JSON.stringify(data.user)); // 🚀 Salva os dados no localStorage
+      localStorage.setItem("user", JSON.stringify(data.user));
       setMessage("Login realizado com sucesso! Redirecionando...");
       setTimeout(() => {
-        router.push("/"); // 🚀 Redireciona para a home
+        router.push("/");
       }, 1500);
     } else {
       setMessage(data.error);
@@ -35,7 +36,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDFDFD] p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-[#F37826]">Login</h2>
 
@@ -64,6 +65,16 @@ const Login = () => {
             Entrar
           </button>
         </form>
+
+        {/* 🚀 Adicionando opção para se cadastrar */}
+        <div className="mt-4 text-center">
+          <p className="text-gray-700">
+            Ainda não tem uma conta?{" "}
+            <Link href="/cadastro" className="text-[#F37826] font-semibold hover:underline">
+              Cadastre-se aqui
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

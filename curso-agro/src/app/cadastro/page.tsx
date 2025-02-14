@@ -21,7 +21,6 @@ const Register = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Função para validar e formatar a data
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = new Date(e.target.value);
     const today = new Date();
@@ -31,7 +30,7 @@ const Register = () => {
       return;
     }
 
-    setMessage(""); // Remove erro se a data for válida
+    setMessage(""); 
     setForm({ ...form, birthDate: e.target.value });
   };
 
@@ -59,14 +58,13 @@ const Register = () => {
     if (res.ok) {
       setMessage("Cadastro realizado com sucesso!");
 
-      // SALVA OS DADOS NO LOCALSTORAGE APÓS O CADASTRO
       const userData = {
         firstName: form.firstName,
         lastName: form.lastName,
         phone: form.phone,
-        birthDate: new Date(form.birthDate).toLocaleDateString("pt-BR"), // Formata a data para exibição
+        birthDate: new Date(form.birthDate).toLocaleDateString("pt-BR"),
         email: form.email,
-        memberSince: new Date().toLocaleDateString("pt-BR", { year: "numeric", month: "long" }), // Adiciona a informação de membro desde
+        memberSince: new Date().toLocaleDateString("pt-BR", { year: "numeric", month: "long" }),
       };
       localStorage.setItem("user", JSON.stringify(userData));
 
@@ -79,14 +77,13 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 text-black">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDFDFD] p-4 text-black">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-[#F37826]">Criar Conta</h2>
 
         {message && <p className="text-center text-sm mt-2 text-red-600">{message}</p>}
 
         <form onSubmit={handleSubmit} className="mt-4">
-          {/* Etapa 1: Nome e Sobrenome */}
           {step === 1 && (
             <>
               <input type="text" name="firstName" placeholder="Nome" value={form.firstName} onChange={handleChange} className="w-full p-3 border rounded-lg mb-2" required />
@@ -95,7 +92,6 @@ const Register = () => {
             </>
           )}
 
-          {/* Etapa 2: Telefone */}
           {step === 2 && (
             <>
               <input type="text" name="phone" placeholder="Telefone" value={form.phone} onChange={handleChange} className="w-full p-3 border rounded-lg mb-2" required />
@@ -106,7 +102,6 @@ const Register = () => {
             </>
           )}
 
-          {/* Etapa 3: Data de Nascimento */}
           {step === 3 && (
             <>
               <input 
@@ -115,7 +110,7 @@ const Register = () => {
                 value={form.birthDate} 
                 onChange={handleDateChange} 
                 className="w-full p-3 border rounded-lg mb-2 text-black" 
-                max={new Date().toISOString().split("T")[0]} // Bloqueia datas futuras
+                max={new Date().toISOString().split("T")[0]} 
                 required 
               />
               <div className="flex justify-between">
@@ -125,7 +120,6 @@ const Register = () => {
             </>
           )}
 
-          {/* Etapa 4: Email e Senha */}
           {step === 4 && (
             <>
               <input type="email" name="email" placeholder="E-mail" value={form.email} onChange={handleChange} className="w-full p-3 border rounded-lg mb-2" required />
@@ -141,6 +135,16 @@ const Register = () => {
             </>
           )}
         </form>
+
+        {/* 🚀 Adicionando opção para fazer login */}
+        <div className="mt-4 text-center">
+          <p className="text-gray-700">
+            Já tem uma conta?{" "}
+            <Link href="/login" className="text-[#F37826] font-semibold hover:underline">
+              Faça login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
