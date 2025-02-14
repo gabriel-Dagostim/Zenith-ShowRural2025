@@ -8,7 +8,7 @@ const Navbar = () => {
         {/* Logo e Link para Página de Cursos */}
         <Link href="/cursos">
           <button className="bg-[#F37826] text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-600 transition">
-            📚 Cursos Agro
+            📚 Conteudo baixado
           </button>
         </Link>
 

@@ -10,7 +10,6 @@ const BottomNav = () => {
       <Link href="/meus-cursos">
         <BookmarkIcon className="h-8 w-8 text-[#4CAF50] cursor-pointer hover:scale-110 transition" />
       </Link>
-      <MicrophoneIcon className="h-10 w-10 text-[#009DFF] cursor-pointer hover:scale-110 transition" />
       <Link href="/perfil">
         <UserIcon className="h-8 w-8 text-[#F37826] cursor-pointer hover:scale-110 transition" />
       </Link>

@@ -1,14 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import CompanyCard from "@/components/CompanyCard";
-import ProductCard from "@/components/ProductCard";
+import CourseCard from "@/components/CourseCard";
 import BottomNav from "@/components/BottomNav";
 
 export default function CoursesPage() {
   const [selectedCompany, setSelectedCompany] = useState("Todas");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [cursos, setCursos] = useState([]);
 
+  // Empresas disponíveis (logo puxado dinamicamente)
   const companies = [
     { name: "Todas", logo: "" },
     { name: "DJI", logo: "/logos/dji.png" },
@@ -17,24 +19,34 @@ export default function CoursesPage() {
     { name: "New Holland", logo: "/logos/new_holland.png" },
   ];
 
+  // Categorias dos cursos (exemplo inicial, pode ser expandido no futuro)
   const categories = ["Todos", "Máquinas", "Drones", "Ferramentas", "Tecnologia"];
 
-  const courses = [
-    { title: "Drone Agrícola T30", company: "DJI", image: "/products/dji_t30.jpg", totalHours: "5", category: "Drones" },
-    { title: "Drone Phantom 4 RTK", company: "DJI", image: "/products/dji_p4.jpg", totalHours: "3.5", category: "Drones" },
-    { title: "Mavic 3 Enterprise", company: "DJI", image: "/products/dji_mavic3.jpg", totalHours: "4", category: "Drones" },
-    { title: "Trator 8R", company: "John Deere", image: "/products/john_8r.jpg", totalHours: "4.2", category: "Máquinas" },
-  ];
+  // Busca os cursos na API
+  useEffect(() => {
+    const fetchCursos = async () => {
+      try {
+        const res = await fetch("/api/cursos");
+        if (!res.ok) throw new Error("Erro ao buscar cursos.");
+        const data = await res.json();
+        setCursos(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-  const filteredCourses = courses.filter(
+    fetchCursos();
+  }, []);
+
+  // Filtra os cursos baseando-se nas seleções do usuário
+  const filteredCourses = cursos.filter(
     (course) =>
-      (selectedCompany === "Todas" || course.company === selectedCompany) &&
-      (selectedCategory === "Todos" || course.category === selectedCategory)
+      (selectedCompany === "Todas" || course.empresa === selectedCompany) &&
+      (selectedCategory === "Todos" || categories.includes(selectedCategory))
   );
 
   return (
     <div className="bg-[#FDFDFD] text-black min-h-screen pb-20 mt-20">
-
       <Navbar />
 
       {/* Seção de Filtros */}
@@ -79,24 +91,23 @@ export default function CoursesPage() {
         </div>
       </div>
 
-      {/* Seção de Cursos Filtrados */}
+      {/* Seção de Cursos Disponíveis */}
       <div className="p-4">
-        <h2 className="text-2xl font-bold text-[#F37826] mb-4">Cursos Disponíveis</h2>
+        <h2 className="text-2xl font-bold text-[#F37826] mb-4">📚 Cursos Disponíveis</h2>
         {filteredCourses.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-3">
             {filteredCourses.map((course, index) => (
-              <ProductCard
+              <CourseCard
                 key={index}
-                title={course.title}
-                image={course.image}
-                logo={`/logos/${course.company.toLowerCase().replace(/\s+/g, "_")}.png`}
-                totalHours={course.totalHours}
-                company={course.company}
+                nome={course.nome}
+                empresa={course.empresa}
+                capa={course.capa}
+                modulos={course.modulos}
               />
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 mt-4">Nenhum curso encontrado com os filtros selecionados.</p>
+          <p className="text-gray-600 mt-4 text-center">Nenhum curso encontrado com os filtros selecionados.</p>
         )}
       </div>
 

@@ -11,14 +11,17 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "bcryptjs": "^3.0.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.0",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-imask": "^7.6.1"
+    "react-imask": "^7.6.1",
+    "swiper": "^11.2.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

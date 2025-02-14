@@ -1,112 +1,134 @@
 "use client";
-import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Image from "next/image";
-import { XMarkIcon, PlayIcon, ClockIcon } from "@heroicons/react/24/solid";
-import Carousel from "@/components/Carousel";
+import ImageCarousel from "@/components/ImageCarousel";
 
-const CourseDetails = () => {
+type Modulo = {
+  nome: string;
+  duracao: string;
+  url: string;
+};
+
+type Curso = {
+  nome: string;
+  empresa: string;
+  empresaLogo: string;
+  imagens: string[];
+  pdfCompleto: string;
+  modulos: Modulo[];
+  videos: string[];
+};
+
+const CourseDetailsPage = () => {
   const params = useParams();
-  const [isEnrolled, setIsEnrolled] = useState(false);
-  const [courseTitle, setCourseTitle] = useState<string | null>(null);
+  const nomeCursoUrl = params?.curso ? decodeURIComponent(params.curso as string) : "";
+  
+  const [curso, setCurso] = useState<Curso | null>(null);
+  const [progresso, setProgresso] = useState(0);
+  const [modulosConcluidos, setModulosConcluidos] = useState<string[]>([]);
 
   useEffect(() => {
-    if (params?.curso) {
-      setCourseTitle(decodeURIComponent(params.curso.replace(/-/g, " ")));
+    const fetchCurso = async () => {
+      try {
+        const res = await fetch("/api/cursos");
+        if (!res.ok) throw new Error("Erro ao buscar cursos.");
+        const cursos = await res.json();
+        const cursoSelecionado = cursos.find((c: Curso) => c.nome === nomeCursoUrl);
+
+        if (cursoSelecionado) {
+          setCurso(cursoSelecionado);
+
+          // Buscar progresso do usuário no MongoDB
+          const progressoRes = await fetch(`/api/progresso?cursoNome=${cursoSelecionado.nome}`);
+          const progressoData = await progressoRes.json();
+          
+          if (progressoData) {
+            setModulosConcluidos(progressoData.modulosConcluidos || []);
+            setProgresso(progressoData.progresso || 0);
+          }
+        } else {
+          console.error("Curso não encontrado:", nomeCursoUrl);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (nomeCursoUrl) fetchCurso();
+  }, [nomeCursoUrl]);
+
+  const marcarModuloConcluido = async (modulo: string) => {
+    if (!curso) return;
+
+    if (!modulosConcluidos.includes(modulo)) {
+      const novosModulos = [...modulosConcluidos, modulo];
+      setModulosConcluidos(novosModulos);
+      const progressoCalculado = Math.round((novosModulos.length / curso.modulos.length) * 100);
+      setProgresso(progressoCalculado);
+
+      await fetch("/api/progresso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cursoNome: curso.nome,
+          progresso: progressoCalculado,
+          modulosConcluidos: novosModulos,
+        }),
+      });
     }
-  }, [params]);
-
-  if (!courseTitle) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg font-bold text-[#F37826]">Carregando curso...</p>
-      </div>
-    );
-  }
-
-  // Simulação de dados do curso
-  const courseData = {
-    title: courseTitle,
-    company: "DJI",
-    logo: "/logos/dji.png",
-    duration: "5 horas",
-    description:
-      "Este curso ensina tudo sobre o uso de drones na agricultura, incluindo técnicas de pulverização, mapeamento e monitoramento de culturas.",
-    images: ["/products/dji_t30.jpg", "/products/dji_p4.jpg", "/products/dji_mavic3.jpg"],
-    lessons: [
-      { title: "Introdução ao Curso", duration: "10 min" },
-      { title: "Aula 1: Primeiros Passos", duration: "20 min" },
-      { title: "Aula 2: Técnicas Avançadas", duration: "35 min" },
-    ],
   };
 
+  if (!curso) return <p className="text-center text-gray-600">Carregando curso...</p>;
+
   return (
-    <div className="bg-[#FDFDFD] text-black min-h-screen pb-20 p-4 mt-20">
-      {/* Botão para Fechar */}
-      <div className="flex justify-end">
-        <button className="text-gray-500 hover:text-gray-700">
-          <XMarkIcon className="h-6 w-6" />
-        </button>
+    <div className="bg-[#FDFDFD] text-black min-h-screen p-4 flex flex-col items-center">
+      <h1 className="text-2xl md:text-3xl font-bold text-[#F37826] text-center">{curso.nome}</h1>
+
+      <div className="mt-2 flex items-center gap-2">
+        <Image src={curso.empresaLogo} alt={curso.empresa} width={60} height={60} className="h-10 w-10 object-contain" />
+        <p className="text-gray-600 text-sm md:text-base">{curso.empresa}</p>
       </div>
 
-      {/* Carrossel de Imagens */}
-      <Carousel images={courseData.images} />
-
-      {/* Informações do Curso */}
-      <div className="mt-4 text-center">
-        <div className="flex flex-col items-center">
-          <Image src={courseData.logo} alt="Logo" width={60} height={60} className="rounded-full" />
-          <h1 className="text-2xl font-bold text-[#F37826] mt-2">{courseData.title}</h1>
-        </div>
-        <p className="text-gray-600 mt-2 text-lg">{courseData.description}</p>
-
-        {/* Duração e Inscrição */}
-        <div className="mt-4 flex items-center justify-center gap-3">
-          <ClockIcon className="h-5 w-5 text-[#F37826]" />
-          <span className="text-black text-lg">{courseData.duration}</span>
-        </div>
-
-        {/* Botão de Inscrição e Desinscrição */}
-        <div className="mt-4">
-          {!isEnrolled ? (
-            <button
-              onClick={() => setIsEnrolled(true)}
-              className="w-full max-w-sm py-3 rounded-lg text-white font-bold bg-[#F37826] hover:bg-orange-600 transition"
-            >
-              Inscrever-se
-            </button>
-          ) : (
-            <>
-              <button className="w-full max-w-sm py-3 rounded-lg text-white font-bold bg-gray-600 cursor-default">
-                ✅ Inscrito
-              </button>
-              <button
-                onClick={() => setIsEnrolled(false)}
-                className="w-full max-w-sm py-2 mt-2 text-[#F37826] font-bold hover:underline flex items-center justify-center"
-              >
-                <XMarkIcon className="h-5 w-5 mr-2" /> Desinscrever-se
-              </button>
-            </>
-          )}
-        </div>
+      <div className="mt-4 w-full max-w-lg">
+        <ImageCarousel images={curso.imagens} />
       </div>
 
-      {/* Se o usuário estiver inscrito, mostra as aulas */}
-      {isEnrolled && (
+      <p className="text-lg font-semibold text-gray-700 mt-4">⏳ Progresso: {progresso}%</p>
+      <div className="w-full max-w-lg mt-2 h-4 bg-gray-300 rounded-full overflow-hidden">
+        <div className="h-full bg-[#4CAF50] transition-all duration-300" style={{ width: `${progresso}%` }}></div>
+      </div>
+
+      {curso.pdfCompleto && (
         <div className="mt-6">
-          <h2 className="text-xl font-semibold text-center text-[#F37826]">📖 Aulas Disponíveis</h2>
-          <ul className="mt-3">
-            {courseData.lessons.map((lesson, index) => (
-              <li key={index} className="flex items-center gap-3 text-gray-700 text-lg py-2 border-b border-gray-300">
-                <PlayIcon className="h-6 w-6 text-[#F37826]" />
-                {lesson.title} - <span className="text-black">{lesson.duration}</span>
-              </li>
-            ))}
-          </ul>
+          <a href={curso.pdfCompleto} download className="bg-[#4CAF50] text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition">
+            📄 Baixar Curso Completo (PDF)
+          </a>
         </div>
       )}
+
+      <h2 className="text-lg font-semibold text-[#F37826] mt-6">📖 Aulas Disponíveis</h2>
+      {curso.modulos.length > 0 ? (
+        <ul className="text-sm text-gray-700 mt-2 space-y-2">
+          {curso.modulos.map((modulo, index) => (
+            <li key={index} className="p-2 border-b border-gray-300 flex justify-between">
+              <a href={modulo.url} download onClick={() => marcarModuloConcluido(modulo.nome)} className={`text-[#009DFF] underline ${modulosConcluidos.includes(modulo.nome) ? "line-through text-gray-500" : ""}`}>
+                {modulo.nome}
+              </a>
+              <span className="text-gray-500">{modulo.duracao}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-500">Nenhum módulo disponível.</p>
+      )}
+
+      <h2 className="text-lg font-semibold text-[#F37826] mt-6">🎥 Vídeos do Curso</h2>
+      {curso.videos.length > 0 ? curso.videos.map((video, index) => (
+        <video key={index} controls src={video} className="w-full max-w-lg mt-2"></video>
+      )) : <p className="text-gray-500">Este curso não possui vídeos.</p>}
     </div>
   );
 };
 
-export default CourseDetails;
+export default CourseDetailsPage;

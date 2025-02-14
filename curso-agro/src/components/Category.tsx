@@ -20,12 +20,12 @@ const Category = ({ name, logo, products }: CategoryProps) => {
       <div className="flex gap-4 overflow-x-auto scrollbar-hide">
         {products.map((product, index) => (
           <ProductCard
-            key={index}
-            title={product.title}
-            image={product.image}
-            logo={logo} // Passamos a logo da empresa para os produtos
-            totalHours={product.totalHours} // Passamos a duração dos tutoriais
-          />
+                key={index}
+                title={product.title}
+                image={product.image}
+                logo={logo} // Passamos a logo da empresa para os produtos
+                totalHours={product.totalHours} // Passamos a duração dos tutoriais
+                company={""}          />
         ))}
       </div>
     </div>
