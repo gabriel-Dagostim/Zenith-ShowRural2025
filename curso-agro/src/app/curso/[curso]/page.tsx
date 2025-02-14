@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import ImageCarousel from "@/components/ImageCarousel";
+import BottomNav from "@/components/BottomNav";
 
 type Modulo = {
   nome: string;
@@ -127,8 +128,9 @@ const CourseDetailsPage = () => {
       {curso.videos.length > 0 ? curso.videos.map((video, index) => (
         <video key={index} controls src={video} className="w-full max-w-lg mt-2"></video>
       )) : <p className="text-gray-500">Este curso não possui vídeos.</p>}
+      <div className="mt-10"><BottomNav /></div>
+      
     </div>
   );
 };
-
 export default CourseDetailsPage;

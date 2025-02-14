@@ -3,176 +3,100 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   UserCircleIcon,
-  BookOpenIcon,
-  DocumentTextIcon,
-  Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-  PencilIcon,
-  CheckIcon,
-  XMarkIcon,
+  DocumentTextIcon,
+  CheckBadgeIcon
 } from "@heroicons/react/24/outline";
 import BottomNav from "@/components/BottomNav";
-import ProfileTab from "@/components/ProfileTab";
-import CompletedCoursesTab from "@/components/CompletedCoursesTab";
-import CertificatesTab from "@/components/CertificatesTab";
-import SettingsTab from "@/components/SettingsTab";
+import Navbar from "@/components/Navbar";
 
 const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState("profile");
-  const [user, setUser] = useState<{ firstName: string; lastName: string; phone: string; birthDate: string; email: string; memberSince: string } | null>(null);
-  const [editingField, setEditingField] = useState<string | null>(null);
-  const [tempValue, setTempValue] = useState("");
-  const [message, setMessage] = useState("");
+  const [user, setUser] = useState<{ firstName: string; lastName: string; email: string; cursosCompletos: string[] } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser && storedUser !== "undefined") {
-        const parsedUser = JSON.parse(storedUser);
-        
-        // Adiciona a informação "Membro desde" se não existir
-        if (!parsedUser.memberSince) {
-          parsedUser.memberSince = new Date().toLocaleDateString("pt-BR", {
-            year: "numeric",
-            month: "long",
-          });
-          localStorage.setItem("user", JSON.stringify(parsedUser));
-        }
-        
-        setUser(parsedUser);
-      }
-    } catch (error) {
-      console.error("Erro ao carregar usuário:", error);
-      localStorage.removeItem("user"); // Limpa dados corrompidos
-    }
-  }, []);
-
-  const handleEdit = (field: string, value: string) => {
-    setEditingField(field);
-    setTempValue(value);
-  };
-
-  const handleSave = async () => {
-    if (user) {
-      const updatedUser = { ...user, [editingField!]: tempValue };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setEditingField(null);
-
-      // Atualiza no backend
+    const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/update", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedUser),
-        });
-
-        if (res.ok) {
-          setMessage("Perfil atualizado com sucesso!");
+        const storedUser = localStorage.getItem("user");
+        if (storedUser && storedUser !== "undefined") {
+          setUser(JSON.parse(storedUser));
         } else {
-          setMessage("Erro ao atualizar perfil.");
+          const res = await fetch("/api/auth/user", { method: "GET", credentials: "include" });
+          if (res.ok) {
+            const data = await res.json();
+            setUser(data);
+            localStorage.setItem("user", JSON.stringify(data));
+          } else {
+            console.error("Erro ao obter usuário:", res.status);
+            localStorage.removeItem("user");
+          }
         }
       } catch (error) {
-        setMessage("Erro de conexão com o servidor.");
+        console.error("Erro ao carregar usuário:", error);
       }
-    }
-  };
+    };
+    fetchUser();
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user"); // Remove os dados do usuário
-    router.push("/login"); // Redireciona para a página de login
+    localStorage.removeItem("user");
+    fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+      .then(() => router.push("/login"))
+      .catch((err) => console.error("Erro ao fazer logout:", err));
+  };
+
+  const handleDownloadCertificate = (curso: string) => {
+    // Lógica para baixar o certificado (ainda será implementada)
+    console.log(`Baixando certificado de ${curso}`);
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-black p-4">
-      {/* Cabeçalho do Perfil */}
-      <div className="flex flex-col items-center">
-        <UserCircleIcon className="h-24 w-24 text-gray-500" />
+    <div className="min-h-screen bg-[#FDFDFD] text-black">
+      <Navbar />
+      
+      {/* Seção do Perfil */}
+      <div className="bg-white shadow-md rounded-lg p-6 mx-4 mt-16">
+        <div className="flex flex-col items-center">
+          <UserCircleIcon className="h-24 w-24 text-gray-500" />
+          {user && (
+            <h2 className="text-xl font-semibold text-[#F37826] mt-2">{user.firstName} {user.lastName}</h2>
+          )}
+          <p className="text-gray-600">{user?.email}</p>
+        </div>
       </div>
 
-      {/* Seção de Informações Pessoais */}
-      {user ? (
-        <div className="bg-white p-4 rounded-lg shadow-md mt-4">
-          <h2 className="text-xl font-semibold text-[#F37826] mb-3">Informações Pessoais</h2>
-          <p className="text-gray-700"><strong>Nome:</strong> {user.firstName} {user.lastName}</p>
-          <p className="text-gray-700"><strong>E-mail:</strong> {user.email}</p>
-          <p className="text-gray-700"><strong>Telefone:</strong> {user.phone}</p>
-          <p className="text-gray-700"><strong>Data de Nascimento:</strong> {user.birthDate}</p>
-          <p className="text-gray-700"><strong>Membro desde:</strong> {user.memberSince}</p>
-        </div>
-      ) : (
-        <p className="text-center text-gray-600 mt-4">Nenhum usuário logado</p>
-      )}
+      {/* Seção de Certificados */}
+      <div className="bg-white shadow-md rounded-lg p-6 mx-4 mt-4">
+        <h2 className="text-xl font-semibold text-[#F37826] mb-3">📜 Certificados</h2>
 
-      {/* Seção de Edição */}
-      {user && (
-        <div className="bg-white p-4 rounded-lg shadow-md mt-4">
-          <h2 className="text-xl font-semibold text-[#F37826] mb-3">Editar Informações</h2>
-          
-          <p className="text-gray-700 flex items-center gap-2">
-            <strong>Nome:</strong>
-            {editingField === "firstName" || editingField === "lastName" ? (
-              <>
-                <input
-                  type="text"
-                  value={tempValue}
-                  onChange={(e) => setTempValue(e.target.value)}
-                  className="p-1 border rounded text-black"
-                />
-                <CheckIcon className="h-5 w-5 text-green-500 cursor-pointer" onClick={handleSave} />
-                <XMarkIcon className="h-5 w-5 text-red-500 cursor-pointer" onClick={() => setEditingField(null)} />
-              </>
-            ) : (
-              <>
-                {user.firstName} {user.lastName}
-                <PencilIcon className="h-5 w-5 text-gray-500 cursor-pointer" onClick={() => handleEdit("firstName", user.firstName)} />
-              </>
-            )}
-          </p>
-
-          <p className="text-gray-700 flex items-center gap-2">
-            <strong>E-mail:</strong>
-            {editingField === "email" ? (
-              <>
-                <input
-                  type="email"
-                  value={tempValue}
-                  onChange={(e) => setTempValue(e.target.value)}
-                  className="p-1 border rounded text-black"
-                />
-                <CheckIcon className="h-5 w-5 text-green-500 cursor-pointer" onClick={handleSave} />
-                <XMarkIcon className="h-5 w-5 text-red-500 cursor-pointer" onClick={() => setEditingField(null)} />
-              </>
-            ) : (
-              <>
-                {user.email}
-                <PencilIcon className="h-5 w-5 text-gray-500 cursor-pointer" onClick={() => handleEdit("email", user.email)} />
-              </>
-            )}
-          </p>
-        </div>
-      )}
-
-      {/* Navegação do Perfil */}
-      <div className="flex justify-between mt-6 border-b border-gray-300 pb-2 text-sm">
-        <button onClick={() => setActiveTab("courses")} className={`flex-1 py-2 text-center ${activeTab === "courses" ? "border-b-2 border-[#F37826] text-[#F37826]" : "text-gray-600"}`}>
-          <BookOpenIcon className="h-5 w-5 mx-auto" /> Cursos Concluídos
-        </button>
-        <button onClick={() => setActiveTab("certificates")} className={`flex-1 py-2 text-center ${activeTab === "certificates" ? "border-b-2 border-[#F37826] text-[#F37826]" : "text-gray-600"}`}>
-          <DocumentTextIcon className="h-5 w-5 mx-auto" /> Certificados
-        </button>
-      </div>
-
-      {/* Conteúdo das Abas */}
-      <div className="mt-4">
-        {activeTab === "courses" && <CompletedCoursesTab />}
-        {activeTab === "certificates" && <CertificatesTab />}
+        {user?.cursosCompletos?.length ? (
+          <ul className="space-y-3">
+            {user.cursosCompletos.map((curso, index) => (
+              <li key={index} className="flex justify-between items-center bg-gray-100 p-3 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <CheckBadgeIcon className="h-6 w-6 text-green-500" />
+                  <span className="text-gray-800">{curso}</span>
+                </div>
+                <button
+                  onClick={() => handleDownloadCertificate(curso)}
+                  className="bg-[#F37826] text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600 transition"
+                >
+                  📥 Baixar Certificado
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-600">Nenhum curso concluído ainda.</p>
+        )}
       </div>
 
       {/* Botão de Logout */}
       <div className="flex justify-center mt-6">
-        <button onClick={handleLogout} className="bg-red-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-700 flex items-center gap-2">
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-red-700 flex items-center gap-2"
+        >
           <ArrowRightOnRectangleIcon className="h-5 w-5" /> Sair da Conta
         </button>
       </div>

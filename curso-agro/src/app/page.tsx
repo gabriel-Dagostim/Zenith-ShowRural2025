@@ -85,20 +85,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🔹 Destaques e Novidades */}
-      <div className="p-4">
-        <h2 className="text-2xl font-bold text-[#F37826] mb-4">⭐ Destaques e Novidades</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold">🔥 Novo Curso: Pulverização Avançada</h3>
-            <p className="text-sm text-gray-600 mt-1">Aprenda técnicas avançadas de pulverização para otimizar sua produção.</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold">🎉 Desconto Especial</h3>
-            <p className="text-sm text-gray-600 mt-1">Cursos com **20% OFF** até o final do mês!</p>
-          </div>
-        </div>
-      </div>
+
+      
 
       {/* 🔹 Depoimentos de Alunos */}
       <div className="p-4">

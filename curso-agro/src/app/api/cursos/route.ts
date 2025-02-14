@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 // Função para gerar um tempo aleatório para as aulas
 const generateRandomTime = () => {
-  const times = ["10 min", "15 min", "20 min", "25 min", "30 min", "35 min"];
+  const times = ["", "", "", "", "", ""];
   return times[Math.floor(Math.random() * times.length)];
 };
 

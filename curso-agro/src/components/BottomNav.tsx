@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HomeIcon, MicrophoneIcon, UserIcon, BookmarkIcon } from "@heroicons/react/24/solid";
+import { HomeIcon, MicrophoneIcon, UserIcon, AcademicCapIcon } from "@heroicons/react/24/solid";
 
 const BottomNav = () => {
   return (
@@ -8,7 +8,7 @@ const BottomNav = () => {
         <HomeIcon className="h-8 w-8 text-[#F37826] cursor-pointer hover:scale-110 transition" />
       </Link>
       <Link href="/meus-cursos">
-        <BookmarkIcon className="h-8 w-8 text-[#4CAF50] cursor-pointer hover:scale-110 transition" />
+        <AcademicCapIcon className="h-8 w-8 text-[#4CAF50] cursor-pointer hover:scale-110 transition" />
       </Link>
       <Link href="/perfil">
         <UserIcon className="h-8 w-8 text-[#F37826] cursor-pointer hover:scale-110 transition" />
